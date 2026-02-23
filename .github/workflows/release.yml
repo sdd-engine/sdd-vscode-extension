@@ -1,0 +1,97 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Get current version
+        id: current
+        run: |
+          VERSION=$(jq -r '.version' package.json)
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Get previous version
+        id: previous
+        run: |
+          git show HEAD~1:package.json > /tmp/prev-package.json 2>/dev/null || echo '{"version":"0.0.0"}' > /tmp/prev-package.json
+          VERSION=$(jq -r '.version' /tmp/prev-package.json)
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Check if version changed
+        id: version_check
+        run: |
+          if [ "${{ steps.current.outputs.version }}" != "${{ steps.previous.outputs.version }}" ]; then
+            echo "changed=true" >> $GITHUB_OUTPUT
+          else
+            echo "changed=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Check if release exists
+        id: release_check
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          VERSION="${{ steps.current.outputs.version }}"
+          if gh release view "v${VERSION}" > /dev/null 2>&1; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Determine if release needed
+        id: check
+        run: |
+          if [ "${{ steps.version_check.outputs.changed }}" == "true" ] || [ "${{ steps.release_check.outputs.exists }}" == "false" ]; then
+            echo "needed=true" >> $GITHUB_OUTPUT
+          else
+            echo "needed=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Build and package extension
+        if: steps.check.outputs.needed == 'true'
+        run: |
+          npm install
+          npm run package
+
+      - name: Extract changelog for version
+        if: steps.check.outputs.needed == 'true'
+        run: |
+          VERSION="${{ steps.current.outputs.version }}"
+          awk -v ver="$VERSION" '
+            BEGIN { found=0 }
+            /^## \[/ {
+              if (found) exit
+              if (index($0, "[" ver "]") > 0) { found=1; next }
+            }
+            /^---$/ { if (found) exit }
+            found { print }
+          ' CHANGELOG.md > /tmp/release-notes.md
+
+      - name: Create GitHub Release
+        if: steps.check.outputs.needed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          VERSION="${{ steps.current.outputs.version }}"
+          gh release create "v${VERSION}" \
+            --title "SDD Workflows v${VERSION}" \
+            --notes-file /tmp/release-notes.md \
+            *.vsix
