@@ -6,7 +6,7 @@
 git clone https://github.com/sdd-engine/sdd-vscode-extension.git
 cd sdd-vscode-extension
 npm install
-npm run compile
+npm run build
 ```
 
 Then press `F5` in VS Code to launch the Extension Development Host.

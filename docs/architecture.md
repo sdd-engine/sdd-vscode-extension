@@ -9,9 +9,11 @@ The SDD Workflows extension provides ambient visualization of SDD workflow state
 ### Extension Host (`src/`)
 
 - **extension.ts**: Activation, registration of providers and watchers
-- **providers/**: `TreeDataProvider` implementations for the workflow tree view
-- **watchers/**: `FileSystemWatcher` for `.sdd/workflows/` and `sdd/workflows/` directories
-- **types/**: Shared type definitions (workflow state, phases, changes)
+- **views/**: `TreeDataProvider` (workflow-tree.ts), status bar (status-bar.ts), lifecycle webview (lifecycle-webview.ts)
+- **notifications/**: Approval gate notification handlers
+- **workflow-parser.ts**: Parses workflow YAML files into typed state
+- **workflow-watcher.ts**: `FileSystemWatcher` for `.sdd/workflows/` and `sdd/workflows/` directories
+- **types.ts**: Shared type definitions (workflow state, phases, changes)
 
 ### Webview (`webview/`)
 

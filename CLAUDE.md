@@ -6,9 +6,11 @@
 sdd-vscode-extension/
 ├── src/                           # Extension TypeScript source
 │   ├── extension.ts               # Extension entry point
-│   ├── providers/                  # Tree data providers
-│   ├── watchers/                   # File system watchers
-│   └── types/                     # Type definitions
+│   ├── views/                      # Tree view, status bar, lifecycle webview
+│   ├── notifications/              # Approval gate notifications
+│   ├── types.ts                    # Type definitions
+│   ├── workflow-parser.ts          # Workflow YAML parser
+│   └── workflow-watcher.ts         # File system watcher
 ├── webview/                       # Webview panel source (lifecycle stepper)
 ├── media/                         # Icons and images
 ├── dist/                          # Compiled output (gitignored)
@@ -24,7 +26,7 @@ sdd-vscode-extension/
 
 ```bash
 npm install
-npm run compile       # Build extension
+npm run build         # Build extension
 npm run watch         # Watch mode for development
 npm run package       # Create .vsix package
 ```

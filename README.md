@@ -15,7 +15,7 @@ Install from the VS Code Marketplace or build from source:
 
 ```bash
 npm install
-npm run compile
+npm run build
 ```
 
 Then press `F5` in VS Code to launch the extension in development mode.
