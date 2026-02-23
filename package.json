@@ -5,6 +5,11 @@
   "version": "0.1.0",
   "publisher": "sdd-project",
   "private": true,
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sdd-engine/sdd-vscode-extension.git"
+  },
   "engines": {
     "vscode": "^1.96.0"
   },

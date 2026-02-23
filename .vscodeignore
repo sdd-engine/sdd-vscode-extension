@@ -1,0 +1,14 @@
+.github/
+.gitignore
+src/
+webview/
+node_modules/
+tsconfig.json
+tsconfig.extension.json
+tsconfig.webview.json
+webpack.config.js
+docs/
+CONTRIBUTING.md
+CLAUDE.md
+*.ts
+!dist/**
