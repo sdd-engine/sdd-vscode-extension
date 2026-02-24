@@ -20,6 +20,7 @@ export class WorkflowWatcher implements vscode.Disposable {
 
   private readonly _workspaceFolder: vscode.WorkspaceFolder | undefined;
   private _hasSddDir = false;
+  private _sddDirName: 'sdd' | '.sdd' = 'sdd';
 
   constructor(workspaceFolder: vscode.WorkspaceFolder | undefined) {
     this._workspaceFolder = workspaceFolder;
@@ -48,29 +49,38 @@ export class WorkflowWatcher implements vscode.Disposable {
   async start(): Promise<void> {
     if (!this._workspaceFolder) return;
 
-    const sddUri = vscode.Uri.joinPath(this._workspaceFolder.uri, '.sdd');
-
-    try {
-      await vscode.workspace.fs.stat(sddUri);
-      this._hasSddDir = true;
-    } catch {
-      this._hasSddDir = false;
+    // Check sdd/ first (current convention), then .sdd/ (legacy fallback)
+    for (const dir of ['sdd', '.sdd'] as const) {
+      try {
+        await vscode.workspace.fs.stat(
+          vscode.Uri.joinPath(this._workspaceFolder.uri, dir),
+        );
+        this._hasSddDir = true;
+        this._sddDirName = dir;
+        break;
+      } catch {
+        // Continue to next candidate
+      }
     }
 
-    const sddPattern = new vscode.RelativePattern(this._workspaceFolder, '.sdd');
+    // Watch for sdd/ directory creation (current convention)
+    const sddPattern = new vscode.RelativePattern(this._workspaceFolder, 'sdd');
     this._sddWatcher = vscode.workspace.createFileSystemWatcher(
       sddPattern, false, true, false,
     );
     const createSub = this._sddWatcher.onDidCreate(async () => {
       this._hasSddDir = true;
+      this._sddDirName = 'sdd';
       await this._setupWorkflowWatcher();
       await this.refresh();
     });
     const deleteSub = this._sddWatcher.onDidDelete(() => {
-      this._hasSddDir = false;
-      this._previousWorkflows = this._workflows;
-      this._workflows = [];
-      this._onDidChange.fire(this._workflows);
+      if (this._sddDirName === 'sdd') {
+        this._hasSddDir = false;
+        this._previousWorkflows = this._workflows;
+        this._workflows = [];
+        this._onDidChange.fire(this._workflows);
+      }
     });
     this._disposables = [...this._disposables, this._sddWatcher, createSub, deleteSub];
 
@@ -90,7 +100,7 @@ export class WorkflowWatcher implements vscode.Disposable {
     }
 
     const workflowsUri = vscode.Uri.joinPath(
-      this._workspaceFolder.uri, '.sdd', 'workflows',
+      this._workspaceFolder.uri, this._sddDirName, 'workflows',
     );
 
     const entries = await (async () => {
@@ -137,7 +147,7 @@ export class WorkflowWatcher implements vscode.Disposable {
     if (!this._workspaceFolder || this._watcher) return;
 
     const pattern = new vscode.RelativePattern(
-      this._workspaceFolder, '.sdd/workflows/*/workflow.yaml',
+      this._workspaceFolder, `${this._sddDirName}/workflows/*/workflow.yaml`,
     );
     this._watcher = vscode.workspace.createFileSystemWatcher(pattern);
 

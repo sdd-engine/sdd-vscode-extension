@@ -11,4 +11,7 @@ docs/
 CONTRIBUTING.md
 CLAUDE.md
 *.ts
+*.vsix
+package-lock.json
+.temp/
 !dist/**

@@ -124,7 +124,7 @@ export class StatusBarManager implements vscode.Disposable {
 
     if (!this._watcher.hasSddDir) {
       this._item.text = '$(circle-slash) SDD: No project';
-      this._item.tooltip = 'No .sdd/ directory found';
+      this._item.tooltip = 'No sdd/ directory found';
       return;
     }
 

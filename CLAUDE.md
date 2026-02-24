@@ -37,7 +37,7 @@ Press `F5` in VS Code to launch the Extension Development Host.
 
 ## Key Concepts
 
-- Extension activates on startup (looks for `.sdd/` or `sdd/` directories)
+- Extension activates on startup (looks for `sdd/` directory, falls back to `.sdd/` for legacy projects)
 - Uses `FileSystemWatcher` to track workflow file changes
 - Tree view is the primary UI — shows workflows and their changes
 - Status bar shows current phase of the active workflow

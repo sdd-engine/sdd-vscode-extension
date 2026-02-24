@@ -41,7 +41,7 @@
     "viewsWelcome": [
       {
         "view": "sddWorkflows",
-        "contents": "No SDD project detected.\n\nOpen a workspace with an `.sdd/` directory to see workflows.",
+        "contents": "No SDD project detected.\n\nOpen a workspace with an `sdd/` directory to see workflows.",
         "when": "sdd.noProject"
       },
       {
@@ -104,6 +104,7 @@
     }
   },
   "scripts": {
+    "vscode:prepublish": "npm run build",
     "build": "webpack --mode production",
     "build:dev": "webpack --mode development",
     "watch": "webpack --mode development --watch",
